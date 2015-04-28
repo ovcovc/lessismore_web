@@ -4,23 +4,34 @@ from django.contrib.auth.models import User
 
 class Tag(models.Model):
     tag = models.CharField(max_length=50)
+
     def __unicode__(self):
         return self.tag
 
 class BaseMediaModel(models.Model):
     title = models.CharField(max_length=60, blank=True, null=True)
-    image = models.ImageField(upload_to="original/")
-    thumbnail = models.ImageField(upload_to="thumbnails/")
-    scaled = models.ImageField(upload_to="scaled/")
+
     tags = models.ManyToManyField(Tag, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, null=True, blank=True)
 
-class Photo(models.Model):
-    pass
+    class Meta:
+        abstract = True
 
-class Video(models.Model):
-    pass
+class Photo(BaseMediaModel):
+    image = models.ImageField(upload_to="original/")
+    thumbnail = models.ImageField(upload_to="thumbnails/")
+    scaled = models.ImageField(upload_to="scaled/")
+
+    def __unicode__(self):
+        return "photo: {}, {} - {}".format(self.title, self.user, self.created_at)
+
+class Video(BaseMediaModel):
+    video_file = models.FileField(upload_to="videos/", null=True, blank=True)
+    video_url = models.URLField(verbose_name="video URL", null=True, blank=True)
+
+    def __unicode__(self):
+        return "video: {}, {} - {}".format(self.title, self.user, self.created_at)
 
 class BaseModel(models.Model):
     name = models.CharField(verbose_name="name", max_length=200, blank=False, null=False)
