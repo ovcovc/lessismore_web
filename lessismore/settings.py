@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'injuries',
+    'api',
     'rest_framework'
 )
 
@@ -96,7 +97,7 @@ REST_FRAMEWORK = {
 
 #HEROKU
 # Parse database configuration from $DATABASE_URL
-HEROKU = True
+HEROKU = False
 if HEROKU:
     import dj_database_url
     DATABASES['default'] =  dj_database_url.config()
