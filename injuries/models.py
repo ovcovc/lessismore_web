@@ -68,6 +68,7 @@ class Exercise(BaseModel):
 
 
 class Injury(BaseModel):
+    is_accepted = models.BooleanField(default=True)
     x_axis = models.FloatField(verbose_name="x-axis position", default=0.0, blank=False, null=False)
     y_axis = models.FloatField(verbose_name="y-axis position", default=0.0, blank=False, null=False)
     exercises = models.TextField(verbose_name="exercises", blank=True, null=True)
@@ -76,6 +77,7 @@ class Injury(BaseModel):
     medication = models.TextField(verbose_name="suggested medication", null=True, blank=True)
 
     class Meta:
+        managed = True
         verbose_name = "Injury"
         verbose_name_plural = "Injuries"
 

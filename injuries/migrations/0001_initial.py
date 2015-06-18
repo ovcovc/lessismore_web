@@ -1,77 +1,128 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+from django.conf import settings
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Treatment'
-        db.create_table(u'injuries_treatment', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-        ))
-        db.send_create_signal(u'injuries', ['Treatment'])
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
 
-        # Adding model 'Exercise'
-        db.create_table(u'injuries_exercise', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-        ))
-        db.send_create_signal(u'injuries', ['Exercise'])
-
-        # Adding model 'Injury'
-        db.create_table(u'injuries_injury', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=200)),
-            ('description', self.gf('django.db.models.fields.TextField')()),
-            ('x_axis', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('y_axis', self.gf('django.db.models.fields.IntegerField')(default=0)),
-        ))
-        db.send_create_signal(u'injuries', ['Injury'])
-
-        # Adding M2M table for field exercises on 'Injury'
-        m2m_table_name = db.shorten_name(u'injuries_injury_exercises')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('injury', models.ForeignKey(orm[u'injuries.injury'], null=False)),
-            ('exercise', models.ForeignKey(orm[u'injuries.exercise'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['injury_id', 'exercise_id'])
-
-
-    def backwards(self, orm):
-        # Deleting model 'Treatment'
-        db.delete_table(u'injuries_treatment')
-
-        # Deleting model 'Exercise'
-        db.delete_table(u'injuries_exercise')
-
-        # Deleting model 'Injury'
-        db.delete_table(u'injuries_injury')
-
-        # Removing M2M table for field exercises on 'Injury'
-        db.delete_table(db.shorten_name(u'injuries_injury_exercises'))
-
-
-    models = {
-        u'injuries.exercise': {
-            'Meta': {'object_name': 'Exercise'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-        },
-        u'injuries.injury': {
-            'Meta': {'object_name': 'Injury'},
-            'description': ('django.db.models.fields.TextField', [], {}),
-            'exercises': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['injuries.Exercise']", 'symmetrical': 'False'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'x_axis': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'y_axis': ('django.db.models.fields.IntegerField', [], {'default': '0'})
-        },
-        u'injuries.treatment': {
-            'Meta': {'object_name': 'Treatment'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-        }
-    }
-
-    complete_apps = ['injuries']
+    operations = [
+        migrations.CreateModel(
+            name='BodyPart',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=200, verbose_name=b'name')),
+                ('description', models.TextField(verbose_name=b'description')),
+                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name=b'created at')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Exercise',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=200, verbose_name=b'name')),
+                ('description', models.TextField(verbose_name=b'description')),
+                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name=b'created at')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Injury',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=200, verbose_name=b'name')),
+                ('description', models.TextField(verbose_name=b'description')),
+                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name=b'created at')),
+                ('is_accepted', models.BooleanField(default=False)),
+                ('x_axis', models.FloatField(default=0.0, verbose_name=b'x-axis position')),
+                ('y_axis', models.FloatField(default=0.0, verbose_name=b'y-axis position')),
+                ('exercises', models.TextField(null=True, verbose_name=b'exercises', blank=True)),
+                ('treatments', models.TextField(null=True, verbose_name=b'treatment', blank=True)),
+                ('recovery_time', models.TextField(null=True, verbose_name=b'total recovery time', blank=True)),
+                ('medication', models.TextField(null=True, verbose_name=b'suggested medication', blank=True)),
+            ],
+            options={
+                'verbose_name': 'Injury',
+                'verbose_name_plural': 'Injuries',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Photo',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(max_length=60, null=True, blank=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('image', models.ImageField(upload_to=b'original/')),
+                ('thumbnail', models.ImageField(upload_to=b'thumbnails/')),
+                ('scaled', models.ImageField(upload_to=b'scaled/')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Tag',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('tag', models.CharField(max_length=50)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Treatment',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=200, verbose_name=b'name')),
+                ('description', models.TextField(verbose_name=b'description')),
+                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name=b'created at')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Video',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(max_length=60, null=True, blank=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('video_file', models.FileField(null=True, upload_to=b'videos/', blank=True)),
+                ('video_url', models.URLField(null=True, verbose_name=b'video URL', blank=True)),
+                ('tags', models.ManyToManyField(to='injuries.Tag', blank=True)),
+                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='photo',
+            name='tags',
+            field=models.ManyToManyField(to='injuries.Tag', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='photo',
+            name='user',
+            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            preserve_default=True,
+        ),
+    ]
